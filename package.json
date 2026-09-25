@@ -153,6 +153,9 @@
   "peerDependenciesMeta": {
     "vitest": {
       "optional": true
+    },
+    "@dimforge/rapier3d-compat": {
+      "optional": true
     }
   },
   "devDependencies": {
