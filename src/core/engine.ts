@@ -15,6 +15,7 @@ import { PhysicsEngine, type CollisionEvent, type SensorEvent } from './physics.
 import { StateHasher } from './hashing.js';
 import { ResourceOwnershipTracker } from './ownership.js';
 import { DiagnosticLogger } from './diagnostics.js';
+import { WorldRegistry } from './worlds.js';
 import { InputManager } from '../input/input-manager.js';
 import { ActionRegistry } from '../input/actions.js';
 import {
@@ -181,6 +182,8 @@ export class RenderoniEngine {
   readonly input: InputManager;
   readonly actions: ActionRegistry;
   readonly loop: GameLoop;
+  /** Game-owned simulations exposed to MCP describe/observe/check and the state hash. */
+  readonly worlds: WorldRegistry;
 
   // Native 3D Presentation Objects
   readonly native: {
@@ -222,6 +225,7 @@ export class RenderoniEngine {
     this.input = new InputManager();
     this.actions = new ActionRegistry();
     this.loop = new GameLoop(config.loop);
+    this.worlds = new WorldRegistry(this.diagnostics, () => this.clock.tick);
 
     if (this.loop.enabled) {
       this.actions.register({ name: 'loop.start', handle: () => this.loop.start() });
@@ -968,6 +972,9 @@ export class RenderoniEngine {
    * Bodies skipped by the canonical sync are audited first, so a native move
    * Rapier cannot report is repaired and diagnosed instead of being hashed as
    * stale state.
+   *
+   * Registered world providers that implement `hash()` are folded in by name
+   * order; without them the digest is byte-identical to a provider-free engine.
    */
   getStateHash(): string {
     if (!this.hasher.isReady) {
@@ -990,7 +997,8 @@ export class RenderoniEngine {
     return this.hasher.computeHash(
       rawEntities,
       this.transformPipeline.currentBuffer,
-      this.physics.getActiveContacts()
+      this.physics.getActiveContacts(),
+      this.worlds.digests()
     );
   }
 
@@ -1108,6 +1116,7 @@ export class RenderoniEngine {
     guard(() => this.actions.clear());
     guard(() => this.commands.clear());
     guard(() => this.systems.clear());
+    guard(() => this.worlds.clear());
     guard(() => {
       const disposalErrors = this.reportResourceDisposalErrors(
         '<engine>',

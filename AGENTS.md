@@ -54,6 +54,7 @@ When connected over MCP (`bin/renderoni.js mcp`), use:
 - **`act`**: Dispatch typed gameplay actions (`{ name: string, payload?: any }`).
 - **`step`**: Advance simulation by $N$ fixed ticks.
 - **`check`**: Run AST assertions.
+- **World providers**: games with their own simulation register `engine.worlds.register({ name, describe?, observe?, resolve?, hash? })`; providers appear under `worlds` in `describe`, as `## <name>` sections in Tier 0 `observe`, as `world.<name>.<path>` in `check`, and in the state hash (provider-free hashes are unchanged).
 
 ---
 
