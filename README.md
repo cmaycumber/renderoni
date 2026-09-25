@@ -55,6 +55,8 @@ resize();
 game.start();
 ```
 
+Games that never use Rapier (their own simulation, no bodies or colliders) can opt out: `createRenderoni({ physics: false })` never loads the Rapier WASM, since Rapier is imported lazily at engine init, so bundlers split it into a separate chunk that is never fetched. `step()` skips the physics step, and Rapier-backed APIs (`native.world`, the `body`/`sensor`/`kccPlayer` presets, `mesh`/`model` with physics) fail with `RND_0412`.
+
 ---
 
 ## ⚡ CLI & Asset Generation
