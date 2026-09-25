@@ -51,11 +51,12 @@ describe('1.0 package contract', () => {
     expect(packageJson.peerDependenciesMeta.vitest.optional).toBe(true);
   });
 
-  it('requires Three.js and Rapier peers for the installable engine', () => {
+  it('requires Three.js, and Rapier only for engines with physics on', () => {
     expect(packageJson.peerDependencies.three).toBeDefined();
     expect(packageJson.peerDependencies['@dimforge/rapier3d-compat']).toBeDefined();
     expect(packageJson.peerDependenciesMeta.three).toBeUndefined();
-    expect(packageJson.peerDependenciesMeta['@dimforge/rapier3d-compat']).toBeUndefined();
+    // sunder fork: `physics: false` engines never load Rapier, so it is an optional peer
+    expect(packageJson.peerDependenciesMeta['@dimforge/rapier3d-compat']).toEqual({ optional: true });
   });
 
   it('documents the install and mcp commands in package contracts', () => {
