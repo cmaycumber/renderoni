@@ -14,6 +14,7 @@ Renderoni is structured in 4 strict hierarchical layers:
   - **Rule 3**: NEVER import `@dimforge/rapier3d-compat` as a value outside `src/core/physics.ts` (`import type` is fine). Presets get the module from `ctx.native.rapier`, so `physics: false` bundles never include the Rapier WASM.
 - **L1: Batteries & Subsystems (`src/presets/`, `src/animation/`, `src/audio/`, `src/vfx/`, `src/ui/`, `src/scene/`)**: High-level declarative presets (`body`, `sensor`, `light`, `kccPlayer`, `dynamicPlayer`, `proceduralModel`) and compact scene inventories for prompt → img2threejs factories.
   - **Terrain (`src/terrain/`, `renderoni/terrain`)**: `TiledHeightfield` (lazily tiled, LRU-evicted cache over a caller's analytic height function; tiles must stay a pure function of it so evictions rebuild identically) and `TerrainMesh` (streamed chunk LOD mesh with skirts, build budget and picking; presentation only; simulation must never depend on it). Keep `heightAt` allocation-free.
+  - **Navigation (`src/nav/`, `renderoni/nav`)**: `NavGrid` (tiled, lazily sampled grid A* over a game-supplied `NavCostField`, with dynamic blockers, a per-step search `budget` and windowed partial paths), `ExpeditionRouter` (incremental long-distance corridors from verified local paths) and `SpatialHash<T>`. Deterministic and allocation-light: keep hot paths free of per-call allocation and never read time or `Math.random()` in them.
 - **L2: Agent Tooling & MCP (`src/mcp/`, `src/testing/`)**: Stdio Model Context Protocol server, custom Vitest matchers, and headless CLI verification.
 - **L3: Web Application & Demos (`src/demo/`, `index.html`)**: Interactive playground and multi-archetype web showcases.
 
@@ -33,6 +34,7 @@ import { vfx } from 'renderoni/vfx';
 import { TiledHeightfield, TerrainMesh } from 'renderoni/terrain';
 import { ui } from 'renderoni/ui';
 import { createMCPServer } from 'renderoni/mcp';
+import { NavGrid, ExpeditionRouter, SpatialHash } from 'renderoni/nav';
 import 'renderoni/testing/matchers';
 ```
 
